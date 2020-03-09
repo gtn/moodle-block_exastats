@@ -1,0 +1,87 @@
+
+.bloks_exastats h3 {
+	margin-top: 15px;
+}
+
+.exastats_quiz_not_finished {
+	color: red;
+}
+
+.block_exastats_quiz_summary {
+	font-size: small;
+}
+
+.block_exastats_questionnary_summary_ranks {
+	font-size: small;
+}
+
+.block_exastats_quiz_summary .exastats_quiz_grade {
+	white-space: nowrap;
+}
+
+.block_exastats_quiz_summary .exastats_icon_cell {
+	margin: 0;
+	padding: 0;
+}
+
+.block_exastats_quiz_summary .exastats_icon_cell .icon {
+	margin: 0;
+	padding: 0;
+}
+
+.block_exastats_summary_ranks td {
+	margin: 3px;
+	line-height: 1.5;
+}
+
+.block_exastats_summary_ranks tr.category_name:not(:first-child) td {
+	padding-top: 15px;
+}
+
+.block_exastats_summary_ranks tr.category_name td {
+	font-weight: bold;
+}
+
+.block_exastats_summary_ranks td.percent_value {
+	white-space: nowrap;
+	font-size: smaller;
+	width: 10%;
+	padding-left: 3px;
+}
+
+.more_info_bars .row-bar-name {
+	white-space: nowrap;
+	width: 10%;
+	padding-right: 10px;
+}
+
+.more_info_bars .percent_value {
+	white-space: nowrap;
+	width: 10%;
+	padding-left: 10px;
+}
+
+.block_exastats_summary_ranks .bar-name {
+	font-size: smaller;
+	color: #555555;
+}
+
+.bar-container {
+	position: relative;
+	background-color: #eeeeee;
+	height: 5px;
+}
+
+.self-bar {
+	background-color: #385924;
+	height: 5px;
+}
+
+.knowledge-bar {
+	background-color: #F7C810;
+	height: 5px;
+}
+
+.more_info_link {
+	margin-top: 15px;
+}
