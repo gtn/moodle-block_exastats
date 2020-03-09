@@ -125,18 +125,29 @@ class block_exastats_moodleCats extends block_list {
 
 			    // get students
                 $students = block_exastats_get_course_students($courseid);
-                //$students = array(48534, $USER->id);
+                if (count($students) > 0) {
+                    //$students = array(48534, $USER->id);
+                    
+                    $stat = block_exastats_get_user_quizzes_short_results_with_categories($quizid, $students);
+                    //echo "<pre>debug:<strong>block_exastats_moodleCats.php:132</strong>\r\n"; print_r($stat); echo '</pre>'; exit; // !!!!!!!!!! delete it
+                    $block_content = block_exastats_short_view_fromstatdata($stat);
+                    $this->content->items[] = $block_content;
+                    $this->content->items[] = get_string('students_count', 'block_exastats', count($students));
 
-                $stat = block_exastats_get_user_quizzes_short_results_with_categories($quizid, $students);
-                $block_content = block_exastats_short_view_fromstatdata($stat);
-                $this->content->items[] = $block_content;
-                $this->content->items[] = get_string('students_count', 'block_exastats', count($students));
-
-                $bottomLinks = '';
-				$icon = '<img src="'.$output->image_url('stats', 'block_exastats').'" class="icon" alt="" />';
-                $bottomLinks .= '<div class="more_info_link"><a title="'.get_string('detail_quiz_statistic_link', 'block_exastats').'" href="'.$CFG->wwwroot.'/blocks/exastats/detail_quiz_statistic.php?courseid='.$COURSE->id.'&quizid='.$quizid.'">'.$icon.get_string('detail_quiz_statistic_link', 'block_exastats').'</a></div>';
-                //$bottomLinks .= '<div><a title="'.get_string('group_stats', 'block_exastats').'" href="'.$CFG->wwwroot.'/blocks/exastats/stats_group.php?courseid='.$COURSE->id.'">'.$icon.get_string('group_stats', 'block_exastats').'</a></div>';
-                $this->content->items[] = $bottomLinks;
+                    // bottom links
+                    if (!array_key_exists('action', $stat) || $stat['action'] != 'hide_bottom_links') {
+                        $bottomLinks = '';
+                        $icon = '<img src="'.$output->image_url('stats', 'block_exastats').'" class="icon" alt="" />';
+                        $bottomLinks .= '<div class="more_info_link"><a title="'.
+                                get_string('detail_quiz_statistic_link', 'block_exastats').'" href="'.$CFG->wwwroot.
+                                '/blocks/exastats/detail_quiz_statistic.php?courseid='.$COURSE->id.'&quizid='.$quizid.'">'.$icon.
+                                get_string('detail_quiz_statistic_link', 'block_exastats').'</a></div>';
+                        //$bottomLinks .= '<div><a title="'.get_string('group_stats', 'block_exastats').'" href="'.$CFG->wwwroot.'/blocks/exastats/stats_group.php?courseid='.$COURSE->id.'">'.$icon.get_string('group_stats', 'block_exastats').'</a></div>';
+                        $this->content->items[] = $bottomLinks;
+                    }
+                } else {
+                    $this->content->items[] = get_string('no_students_in_course', 'block_exastats');
+                }
 				break;
             case 'admin_settings':
                 $this->content->items[] = '<p>'.get_string('configure_block', 'block_exastats').'</p>';

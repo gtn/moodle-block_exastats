@@ -239,6 +239,7 @@ function block_exastats_get_user_quizzes_short_results_with_categories($quizid =
             $isQuizAverage = true;
         }
         $questions = $quizObj->get_questions();
+
         $maxQuizgrade = quiz_format_grade($quiz, $quiz->sumgrades);
 
         $result['header'] = $quiz->name;
@@ -335,35 +336,50 @@ function block_exastats_get_user_quizzes_short_results_with_categories($quizid =
             $dm = new question_engine_data_mapper();
             // here is not real latest, but latest vith selected attempt! Look conditions in $qubaidscondition
             $latesstepdata = $dm->load_questions_usages_latest_steps($qubaidscondition, $slots);
+            //echo "<pre>debug:<strong>quiz_lib.php:339</strong>\r\n"; print_r($latesstepdata); echo '</pre>'; exit; // !!!!!!!!!! delete it
 
             $userAnsweredData = array();
+            // if the question is 'random' - default function for questions returns not real question list
+            // trying to get real questions from answers
+            $newQuestions = array();
 
             foreach ($latesstepdata as $ans) {
                 //echo "<pre>debug:<strong>block_exaquizstats.php:173</strong>\r\n"; print_r($ans); echo '</pre>'; // !!!!!!!!!! delete it
+                $newQuestions[$ans->questionid] = question_bank::load_question($ans->questionid);
                 // TODO: wich value to use? fraction? (fraction has minfraction - maxfraction value)
+                //echo "<pre>debug:<strong>quiz_lib.php:346</strong>\r\n"; print_r($ans); echo '</pre>'; // !!!!!!!!!! delete it
                 $userAnsweredData[$ans->questionid] = array(
                         'fraction' => $ans->fraction,
                         'minfraction' => $ans->minfraction,
                         'maxfraction' => $ans->maxfraction,
                 );
             }
-
-            foreach ($questions as $question) {
+            //echo "<pre>debug:<strong>quiz_lib.php:357</strong>\r\n"; print_r(array_keys($newQuestions)); echo '</pre>'; exit; // !!!!!!!!!! delete it
+//            foreach ($questions as $question) {
+            foreach ($newQuestions as $question) {
+                $catId = $question->category;
+                //echo "<pre>debug:<strong>quiz_lib.php:360</strong>\r\n"; print_r($question); echo '</pre>'; // !!!!!!!!!! delete it
                 if (!array_key_exists($question->category, $categories)) {
-                    $questioncategory =
-                            $DB->get_record('question_categories', array('id' => $question->category), '*', IGNORE_MISSING);
-                    $categories[$question->category] = array(
-                            'categoryname' => $questioncategory->name,
+                    //$questioncategory = $question->categoryobject;
+                    if ($question->category == 0) {
+                        $categoryname = get_string('no_category_title');
+                        $catId = 0;
+                    } else {
+                        $questioncategory = $DB->get_record('question_categories', array('id' => $question->category), '*', IGNORE_MISSING);
+                        $categoryname = $questioncategory->name;
+                    }
+                    $categories[$catId] = array(
+                            'categoryname' => $categoryname,
                             'maxfraction' => 0,
                             'fraction' => 0,
                             'answersCount' => 0,
                     );
                 }
                 if (array_key_exists($question->id, $userAnsweredData)) {
-                    $categories[$question->category]["maxfraction"] += $userAnsweredData[$question->id]['maxfraction'];
-                    $categories[$question->category]["fraction"] += $userAnsweredData[$question->id]['fraction'];
+                    $categories[$catId]["maxfraction"] += $userAnsweredData[$question->id]['maxfraction'];
+                    $categories[$catId]["fraction"] += $userAnsweredData[$question->id]['fraction'];
                     if ($first_user) { // get count only from first user
-                        $categories[$question->category]["answersCount"]++;
+                        $categories[$catId]["answersCount"]++;
                     }
                 }
             }
@@ -391,9 +407,11 @@ function block_exastats_get_user_quizzes_short_results_with_categories($quizid =
     } else if ($isQuizAverage ) {
         if (count($result['data']) == 0) {
             $result['message'] = get_string('no_answered', 'block_exastats');
+            $result['action'] = 'hide_bottom_links';
         }
     } else {
         $result['message'] = get_string('no_answered', 'block_exastats');
+        $result['action'] = 'hide_bottom_links';
     }
 
 

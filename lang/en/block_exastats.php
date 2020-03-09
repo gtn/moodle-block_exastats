@@ -97,9 +97,11 @@ $string['fillSchoolnumberAndGroup'] = 'Fill the schoolnumber and the group field
 $string['form_schoolnumber_label'] = 'School number';
 $string['form_group_label'] = 'Group/passphrase';
 
-$string['main_block_custom_statistic'] = 'Custom statistic';
-$string['main_block_moodle_categories'] = 'Moodle categories';
+$string['main_block_custom_statistic'] = 'Moodle quizzes';
+$string['main_block_moodle_categories'] = 'Question bank categories';
 $string['configure_block'] = 'Please configure the block in block settings';
+$string['need_to_configurate'] = 'block needs to be configurated';
+$string['turn_editing_on'] = 'Turn editing on';
 
 // for moodle categories stats
 $string['no_any_quizes_in_course'] = 'No any quizes in this course!';
@@ -111,3 +113,5 @@ $string['page_detail_quiz_title'] = 'Detail statistic';
 $string['configure_block'] = 'Please select a quiz in block settings';
 $string['only_for_admins'] = 'Only for admins';
 $string['config_quiz_moodle'] = 'Select a quiz to show';
+$string['no_students_in_course'] = 'The course has no any enrolled students';
+$string['no_category_title'] = 'no category';

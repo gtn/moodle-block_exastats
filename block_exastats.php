@@ -108,8 +108,15 @@ class block_exastats extends block_list {
                 if (is_siteadmin()) { // message is only for Admin
                     $icon = $output->pix_icon('i/info', ' ');
                     $sesskey = sesskey();
-                    $url = new moodle_url($PAGE->url, array('id' => $courseid, 'sesskey' => $sesskey, 'bui_editid' => $this->instance->id));
-                    $this->content->items[] = $icon.'&nbsp;'.html_writer::link($url, get_string('configure_block', 'block_exastats'));
+                    if ($PAGE->user_is_editing()) {
+                        $url = new moodle_url($PAGE->url, array('id' => $courseid, 'sesskey' => $sesskey, 'bui_editid' => $this->instance->id));
+                        $this->content->items[] = $icon.'&nbsp;'.html_writer::link($url, get_string('configure_block', 'block_exastats'));
+                    } else {
+                        $this->content->items[] = $icon.'&nbsp;'.get_string('need_to_configurate', 'block_exastats');
+                        $url = new moodle_url($PAGE->url, array('sesskey' => $sesskey, 'edit' => 'on'));
+                        $this->content->items[] = html_writer::link($url, get_string('turn_editing_on', 'block_exastats'));
+                    }
+
                 } else { // empty non-configurated block for non-admins
                     $this->content->items[] = '';
                 }

@@ -98,7 +98,7 @@ class block_exastats_custom extends block_list {
 		// fast solution for default view as 'teacher'
 		// TODO: find a reason of this thing
 		//if ($view != 'director' && $view != 'teacher')
-		//	$view = 'teacher';
+			$view = 'common'; // TEST!! HIDE in production
 
 		switch ($view) {
 			case 'common':
