@@ -475,10 +475,14 @@ function block_exastats_get_questionnaireresults_by_category($courseid, $categor
 					WHERE qr.course = :courseid ';
 		$params = array('courseid' => $courseid);
 		if ($qrrs = $DB->get_records_sql($sql, $params)) {
+		    $rankfieldname = 'rank';
+            if ($CFG->version < 2018050104) {
+                $rankfieldname = 'rankvalue';
+            }
 			// list of questionnairs for course
 			foreach ($qrrs as $questionnair) {
 				$sql = 'SELECT DISTINCT CONCAT_WS(\'_\', q.id, u.id, qr.id) as uiniq, q.id as qid, q.name as qname, q.content as qcontent,
- 									qrr.rank as qrrrank, u.id as uid,
+ 									qrr.'.$rankfieldname.' as qrrrank, u.id as uid,
  									qr.id as qrid, qr.submitted as submitted
 						 FROM {questionnaire_response} qr 
 								JOIN {questionnaire_response_rank} qrr ON qrr.response_id = qr.id AND qr.survey_id = ? AND qr.complete = \'y\' 

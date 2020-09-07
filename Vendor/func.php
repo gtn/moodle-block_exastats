@@ -159,46 +159,55 @@ function blockVendor_exastats_get_questionnaire_short_results($courseid, $users 
 }
 
 function blockVendor_exastats_get_questionnaireresults_by_category($courseid, $category, $userids) {
-	global $mysqli;
+	global $mysqli, $CFG;
 	$result = array('questions'=>[]);
-	if (!is_array($userids))
-		$userids = array($userids);
+	if (!is_array($userids)) {
+        $userids = array($userids);
+    }
 	if (count($userids) > 0) {
 		$sql = 'SELECT qr.* FROM mdl_questionnaire qr 					
 					WHERE qr.course = '.intval($courseid);
 		$recs = $mysqli->query($sql);
 		// list of questionnairs for course
-		if ($recs)
-		while ($qrrs = $recs->fetch_assoc()) {
-				$sqlTemp = 'SELECT DISTINCT CONCAT_WS(\'_\', q.id, u.id, qr.id) as uiniq, 
-									q.id as qid, q.name as qname, q.content as qcontent, 
-									qrr.rank as qrrrank, u.id as uid, 
-									qr.id as qrid, qr.submitted as submitted
-						 FROM mdl_questionnaire_response qr 
-								JOIN mdl_questionnaire_response_rank qrr ON qrr.response_id = qr.id AND qr.survey_id = '.$qrrs['id'].' AND qr.complete = \'y\' 
-								LEFT JOIN mdl_user u ON u.id = CAST(qr.username AS SIGNED) 
-								JOIN mdl_questionnaire_question q ON q.id = qrr.question_id
-						WHERE qr.username IN ('.implode(',', $userids).') AND q.name LIKE \''.substr($category, 0, 1).'%\' 
-						ORDER BY q.id, u.id, qr.submitted DESC';
-				//echo '<pre style="display:none;">blockVendor_exastats_get_questionnaireresults_by_category:';
-				//echo $sqlTemp.'<br>'; exit;
-				//echo '</pre>';
-				$questions = $mysqli->query($sqlTemp);
-				$alreadyasked = array();
-				if ($questions)
-				while($q = $questions->fetch_assoc()) {
-					$uniqId = $q['qid'].'_'.$q['uid']; // question id + user id
-					if (in_array($uniqId, $alreadyasked))
-						continue;
-					$alreadyasked[] = $uniqId;
-					$question = [];
-					$question['content'] = strip_tags($q['qcontent']);
-					$question['id'] = $q['qid'];
-					$question['response'] = $q['qrrrank'];
-					$question['userid'] = $q['uid'];
-					$result['questions'][] = $question;
-				}
-		}
+        $rankfieldname = 'rank';
+        if ($CFG->version < 2018050104) {
+            $rankfieldname = 'rankvalue';
+        }
+		if ($recs) {
+            while ($qrrs = $recs->fetch_assoc()) {
+                $sqlTemp = 'SELECT DISTINCT CONCAT_WS(\'_\', q.id, u.id, qr.id) as uiniq, 
+                                        q.id as qid, q.name as qname, q.content as qcontent, 
+                                        qrr.'.$rankfieldname.' as qrrrank, u.id as uid, 
+                                        qr.id as qrid, qr.submitted as submitted
+                             FROM mdl_questionnaire_response qr 
+                                    JOIN mdl_questionnaire_response_rank qrr ON qrr.response_id = qr.id AND qr.survey_id = '.
+                        $qrrs['id'].' AND qr.complete = \'y\' 
+                                    LEFT JOIN mdl_user u ON u.id = CAST(qr.username AS SIGNED) 
+                                    JOIN mdl_questionnaire_question q ON q.id = qrr.question_id
+                            WHERE qr.username IN ('.implode(',', $userids).') AND q.name LIKE \''.substr($category, 0, 1).'%\' 
+                            ORDER BY q.id, u.id, qr.submitted DESC';
+                //echo '<pre style="display:none;">blockVendor_exastats_get_questionnaireresults_by_category:';
+                //echo $sqlTemp.'<br>'; exit;
+                //echo '</pre>';
+                $questions = $mysqli->query($sqlTemp);
+                $alreadyasked = array();
+                if ($questions) {
+                    while ($q = $questions->fetch_assoc()) {
+                        $uniqId = $q['qid'].'_'.$q['uid']; // question id + user id
+                        if (in_array($uniqId, $alreadyasked)) {
+                            continue;
+                        }
+                        $alreadyasked[] = $uniqId;
+                        $question = [];
+                        $question['content'] = strip_tags($q['qcontent']);
+                        $question['id'] = $q['qid'];
+                        $question['response'] = $q['qrrrank'];
+                        $question['userid'] = $q['uid'];
+                        $result['questions'][] = $question;
+                    }
+                }
+            }
+        }
 	}
 	return $result;
 }
