@@ -170,7 +170,7 @@ function blockVendor_exastats_get_questionnaireresults_by_category($courseid, $c
 		$recs = $mysqli->query($sql);
 		// list of questionnairs for course
         $rankfieldname = 'rank';
-        if ($CFG->version < 2018050104) {
+        if ($CFG->version >= 2018050104) {
             $rankfieldname = 'rankvalue';
         }
 		if ($recs) {

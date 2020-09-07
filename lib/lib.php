@@ -476,7 +476,7 @@ function block_exastats_get_questionnaireresults_by_category($courseid, $categor
 		$params = array('courseid' => $courseid);
 		if ($qrrs = $DB->get_records_sql($sql, $params)) {
 		    $rankfieldname = 'rank';
-            if ($CFG->version < 2018050104) {
+            if ($CFG->version >= 2018050104) {
                 $rankfieldname = 'rankvalue';
             }
 			// list of questionnairs for course
