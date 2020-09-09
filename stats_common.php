@@ -146,7 +146,7 @@ foreach ($categories as $categoryKey => $category) {
 		echo '<tr>';
 		echo '<td colspan="1"></td>';
 		echo '<td align="right"><strong>'.get_string('result_questiontable_totalgrade', 'block_exastats').'</strong></td>';
-		echo '<td><strong>'.$quiz_results['bestgrade'].'/'.$quiz_results['grade'].'</strong></td>';
+		echo '<td><strong>'.@$quiz_results['bestgrade'].'/'.@$quiz_results['grade'].'</strong></td>';
 		echo '</tr>';
 		echo '</table>';
 		echo '<br>';

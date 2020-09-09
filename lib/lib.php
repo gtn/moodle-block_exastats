@@ -41,36 +41,45 @@ function block_exastats_require_login($courseid, $role = null) {
 // for example:
 // 401660 is a director of the school
 // 401660-mutsw is a teacher
-function block_exastats_get_role_byusername() {
-	global $USER;
+function block_exastats_get_role_byusername()
+{
+    global $USER;
 
-	// is admin?
-	$adminIds = array_keys(get_admins());
-	if (in_array($USER->id, $adminIds))
-		return 'admin';
-	$username = trim($USER->username);
-	//echo '<span style="display:none;">username:'.$username.'</span>';
-	if (!$username)
-		return false;
-	$userD = explode('-', $username);
-	//echo '<span style="display:none;">arr:'.print_r($userD, true).'</span>';
-	if (isset($userD[2]) || (!isset($userD[2]) && isset($userD[1]))) // NNNNN-GROUP-RANDOM or NNNNN-RANDOM
-		return 'common'; // teachers and students
-	if ($userD[0] && is_numeric($userD[0]))
-		return 'director';
-	if ($userD)
-		return 'anonymous';
+    // is admin?
+    $adminIds = array_keys(get_admins());
+    if (in_array($USER->id, $adminIds)) {
+        return 'admin';
+    }
+    $username = trim($USER->username);
+    //echo '<span style="display:none;">username:'.$username.'</span>';
+    if (!$username) {
+        return false;
+    }
+    $userD = explode('-', $username);
+    //echo '<span style="display:none;">arr:'.print_r($userD, true).'</span>';
+    if (isset($userD[2]) || (!isset($userD[2]) && isset($userD[1]))) { // NNNNN-GROUP-RANDOM or NNNNN-RANDOM
+        return 'common'; // teachers and students
+    }
+	if ($userD[0] && is_numeric($userD[0])) {
+        return 'director';
+    }
+	if ($userD) {
+        return 'anonymous';
+    }
 }
 
 function block_exastats_get_schoolid_byusername($username = '') {
 	global $USER;
-	if (!$username)
-		$username = trim($USER->username);
-	if (!$username)
-		return false;
+	if (!$username) {
+        $username = trim($USER->username);
+    }
+	if (!$username) {
+        return false;
+    }
 	$userD = explode('-', $username);
-	if ($userD[0] && is_numeric($userD[0]))
-		return $userD[0];
+	if ($userD[0] && is_numeric($userD[0])) {
+        return $userD[0];
+    }
 	return 0;
 }
 
@@ -172,7 +181,7 @@ function block_exastats_get_schools_byfilter($filter) {
 }
 
 function block_exastats_get_groupusers($schoolids = null, $onlyIds = false, $addFilters = array()) {
-	global $DB;
+	global $DB, $CFG;
 	$users = array();
 	if ($schoolids && !is_array($schoolids))
 		$schoolids = array($schoolids);
@@ -194,6 +203,10 @@ function block_exastats_get_groupusers($schoolids = null, $onlyIds = false, $add
 		        $likeClauseArr[] = ' u.username LIKE \''.$sId.'-%\' ';
             }
 		}
+        $userfieldname = 'username';
+        if ($CFG->version >= 2018050104) {
+            $userfieldname = 'userid';
+        }
 		// add additional filters
 		if (count($addFilters) > 0) {
 			// gender
@@ -201,7 +214,7 @@ function block_exastats_get_groupusers($schoolids = null, $onlyIds = false, $add
 				//$fieldid = block_exastats_get_user_info_field_id('gender');
 				$questionid = block_exastats_get_questionid_from_questionnaire('Geschlecht');
 				if ($questionid > 0) {
-					$join .= '  JOIN {questionnaire_response} resp ON resp.username = u.id AND resp.complete = \'y\'
+					$join .= '  JOIN {questionnaire_response} resp ON resp.'.$userfieldname.' = u.id AND resp.complete = \'y\'
 								LEFT JOIN {questionnaire_resp_single} respGender ON respGender.response_id = resp.id AND respGender.question_id = '.$questionid;
 					$tempWhere = ' respGender.choice_id IN (\''.implode('\',\'', $addFilters['gender']).'\')';
 					if (in_array('noSelected', $addFilters['gender'])) {
@@ -214,7 +227,7 @@ function block_exastats_get_groupusers($schoolids = null, $onlyIds = false, $add
 			if (isset($addFilters['yearsonjob']) && count($addFilters['yearsonjob']) > 0 && array_filter($addFilters['yearsonjob'])) {
 				$questionid = block_exastats_get_questionid_from_questionnaire('Schuldienst');
 				if ($questionid > 0) {
-					$join .= '  JOIN {questionnaire_response} resp2 ON resp2.username = u.id AND resp2.complete = \'y\'
+					$join .= '  JOIN {questionnaire_response} resp2 ON resp2.'.$userfieldname.' = u.id AND resp2.complete = \'y\'
 								LEFT JOIN {questionnaire_resp_single} respYearsonjob ON respYearsonjob.response_id = resp2.id AND respYearsonjob.question_id = '.$questionid;
 					$tempWhere = ' respYearsonjob.choice_id IN (\''.implode('\',\'', $addFilters['yearsonjob']).'\')';
 					if (in_array('noSelected', $addFilters['yearsonjob'])) {
@@ -465,8 +478,9 @@ function block_exastats_get_quizresults_by_category2($courseid, $category, $user
 function block_exastats_get_questionnaireresults_by_category($courseid, $category, $userids) {
 	global $DB, $CFG, $PAGE;
 	$result = array('questions'=>[]);
-	if (!is_array($userids))
-		$userids = array($userids);
+	if (!is_array($userids)) {
+        $userids = array($userids);
+    }
 	if (count($userids) > 0) {
 		require_once $CFG->dirroot.'/mod/questionnaire/questionnaire.class.php';
 		//require_once $CFG->dirroot.'/mod/questionnaire/classes/response/base.php';
@@ -476,8 +490,12 @@ function block_exastats_get_questionnaireresults_by_category($courseid, $categor
 		$params = array('courseid' => $courseid);
 		if ($qrrs = $DB->get_records_sql($sql, $params)) {
 		    $rankfieldname = 'rank';
+            $userfieldname = 'username';
+            $surveyfieldname = 'survey_id';
             if ($CFG->version >= 2018050104) {
                 $rankfieldname = 'rankvalue';
+                $userfieldname = 'userid';
+                $surveyfieldname = 'questionnaireid';
             }
 			// list of questionnairs for course
 			foreach ($qrrs as $questionnair) {
@@ -485,10 +503,10 @@ function block_exastats_get_questionnaireresults_by_category($courseid, $categor
  									qrr.'.$rankfieldname.' as qrrrank, u.id as uid,
  									qr.id as qrid, qr.submitted as submitted
 						 FROM {questionnaire_response} qr 
-								JOIN {questionnaire_response_rank} qrr ON qrr.response_id = qr.id AND qr.survey_id = ? AND qr.complete = \'y\' 
-								LEFT JOIN {user} u ON u.id = CAST(qr.username AS SIGNED) 
+								JOIN {questionnaire_response_rank} qrr ON qrr.response_id = qr.id AND qr.'.$surveyfieldname.' = ? AND qr.complete = \'y\' 
+								LEFT JOIN {user} u ON u.id = CAST(qr.'.$userfieldname.' AS SIGNED) 
 								JOIN {questionnaire_question} q ON q.id = qrr.question_id
-						WHERE qr.username IN ('.implode(',', $userids).') AND q.name LIKE \''.substr($category, 0, 1).'%\' 
+						WHERE qr.'.$userfieldname.' IN ('.implode(',', $userids).') AND q.name LIKE \''.substr($category, 0, 1).'%\' 
 						ORDER BY q.id, u.id, qr.submitted DESC';
 				// may be with HEAVING?
 /*				SELECT DISTINCT CONCAT_WS('_', q.id, u.id, qr.id) as uiniq, q.id as qid, q.name as qname, q.content as qcontent, qrr.rank as qrrrank, u.id as uid, qr.id as qrid, qr.submitted as qrsubmitted, MAX(qr.submitted) as lasttimesubmitted
@@ -530,8 +548,12 @@ function block_exastats_get_questionnaireresults_by_category2($courseid, $catego
 	require_once $CFG->dirroot.'/mod/questionnaire/questionnaire.class.php';
 	//require_once $CFG->dirroot.'/mod/questionnaire/classes/response/base.php';
 	//$respBase = new mod_questionnaire\response\base();
+    $surveyfieldname = 'survey_id';
+    if ($CFG->version >= 2018050104) {
+        $surveyfieldname = 'questionnaireid';
+    }
 	$sql = 'SELECT q.* FROM {questionnaire_question} q
- 					JOIN {questionnaire} qr ON qr.id = q.survey_id
+ 					JOIN {questionnaire} qr ON qr.id = q.'.$surveyfieldname.'
 					WHERE qr.course = :courseid AND q.name LIKE \''.substr($category, 0, 1).'.%\'';
 	$params = array('courseid' => $courseid);
 	if ($records = $DB->get_records_sql($sql, $params)) {
@@ -540,11 +562,11 @@ function block_exastats_get_questionnaireresults_by_category2($courseid, $catego
 			$question = [];
 			$question['content'] = strip_tags($qr_question->content);
 			$question['id'] = $qr_question->id;
-			$cm = get_coursemodule_from_instance('questionnaire', $qr_question->survey_id, $courseid);
-			$questionnairobj = new questionnaire($qr_question->survey_id, null, $courseid, $cm);
+			$cm = get_coursemodule_from_instance('questionnaire', $qr_question->{$surveyfieldname}, $courseid);
+			$questionnairobj = new questionnaire($qr_question->{$surveyfieldname}, null, $courseid, $cm);
 			$qr_questions = $questionnairobj->questions;
 			$qq = array_shift($qr_questions);
-			$user_responses_sql = $qq->response->get_bulk_sql($qr_question->survey_id, false, $userid, false);// ->get_results();
+			$user_responses_sql = $qq->response->get_bulk_sql($qr_question->{$surveyfieldname}, false, $userid, false);// ->get_results();
 			$user_responses_sql[0] .= ' AND question_id = ? ';
 			$user_responses_sql[1][] = $qr_question->id;
 			print_r($user_responses_sql); echo '<br><br>';
@@ -589,8 +611,8 @@ function block_exastats_get_questionnaire_short_results($courseid, $users = null
 		$koef = array(0, 100, 66.66, 33.33, 0);
 		$total_count_users = 0;
 		foreach ($result[$categoryKey]['ranks'] as $rankKey => $rankCount) {
-			$total_sum_ranks += $koef[$rankKey] * $rankCount;
-			$total_count_users += $rankCount;
+			$total_sum_ranks += $koef[$rankKey] * intval($rankCount);
+			$total_count_users += intval($rankCount);
 		}
 		if ($total_count_users > 0)
 			$result[$categoryKey]['quiestionnairrank'] = $total_sum_ranks / $total_count_users;
@@ -634,14 +656,20 @@ function block_exastats_show_lastmessage($text, $course, $class='danger') {
 
 
 function block_exastats_getansweredQuestionnaire_schools($courseid, $userids) {
-	global $DB;
+	global $DB, $CFG;
 	$result = array();
 	if (count($userids) > 0) {
+        $userfieldname = 'username';
+        $surveyfieldname = 'survey_id';
+        if ($CFG->version >= 2018050104) {
+            $userfieldname = 'userid';
+            $surveyfieldname = 'questionnaireid';
+        }
 		$sql = 'SELECT DISTINCT u.username
  					FROM {questionnaire} q 
-						JOIN {questionnaire_response} qr ON qr.survey_id = q.id						   
-						LEFT JOIN {user} u ON u.id = CAST(qr.username AS SIGNED) 								
-						WHERE q.course = ? AND qr.complete = \'y\' AND qr.username IN ('.implode(',', $userids).')  
+						JOIN {questionnaire_response} qr ON qr.'.$surveyfieldname.' = q.id						   
+						LEFT JOIN {user} u ON u.id = CAST(qr.'.$userfieldname.' AS SIGNED) 								
+						WHERE q.course = ? AND qr.complete = \'y\' AND qr.'.$userfieldname.' IN ('.implode(',', $userids).')  
 						ORDER BY u.username';
 		$users = $DB->get_records_sql($sql, array($courseid));
 		foreach ($users as $username) {
