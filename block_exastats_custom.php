@@ -72,8 +72,9 @@ class block_exastats_custom extends block_list {
 		// get course
 		$courseid = optional_param('id', 0, PARAM_INT);
 		// if it is quiz editing view - the course will be as course =
-		if (!$courseid)
-			$courseid = optional_param('course', 0, PARAM_INT);
+		if (!$courseid) {
+            $courseid = optional_param('course', 0, PARAM_INT);
+        }
 		//$conditions = array("id" => $courseid);
 		//if (!$course = $DB->get_record("course", $conditions)) {
 		//	print_error("invalidinstance", "block_exastats");
@@ -86,10 +87,12 @@ class block_exastats_custom extends block_list {
 
 		$output = block_exastats_get_renderer();
 
-		if ($this->config && $this->config->viewtype)
-			$view = $this->config->viewtype;
-		if (!isset($view) || $view == 'byRole')
-			$view = block_exastats_get_role_byusername(); //'byRole';  // for new block (TODO: why default settings is not working?)
+		if ($this->config && $this->config->viewtype) {
+            $view = $this->config->viewtype;
+        }
+		if (!isset($view) || $view == 'byRole') {
+            $view = block_exastats_get_role_byusername(); //'byRole';  // for new block (TODO: why default settings is not working?)
+        }
 		//echo '<span style="display: none;">';
 		//echo 'config:';
 		//print_r($this->config);
@@ -98,7 +101,7 @@ class block_exastats_custom extends block_list {
 		// fast solution for default view as 'teacher'
 		// TODO: find a reason of this thing
 		//if ($view != 'director' && $view != 'teacher')
-			$view = 'common'; // TEST!! HIDE in production
+//			$view = 'common'; // TEST!! HIDE in production
 
 		switch ($view) {
 			case 'common':
@@ -114,10 +117,11 @@ class block_exastats_custom extends block_list {
 										<th>'.get_string('knowledge-short', 'block_exastats').'</th></tr>';*/
 				foreach ($quiz_results['quizzes'] as $quiz) {
 					$categoryInd = substr(trim($quiz['name']), 0, 1);
-					if ($questionnaire_results[$categoryInd]['quiestionnairrank'] && $questionnaire_results[$categoryInd]['quiestionnairrank'] > 0)
-						$questionnair_value = $questionnaire_results[$categoryInd]['quiestionnairrank'];
-					else
-						$questionnair_value = 0;
+					if ($questionnaire_results[$categoryInd]['quiestionnairrank'] && $questionnaire_results[$categoryInd]['quiestionnairrank'] > 0) {
+                        $questionnair_value = $questionnaire_results[$categoryInd]['quiestionnairrank'];
+                    } else {
+                        $questionnair_value = 0;
+                    }
 					if ($quiz['bestgrade']['hasgrade']) {
 						$quiz_value = $quiz['bestgrade']['grade'] * 100 / $quiz['grade'];
 					} else {

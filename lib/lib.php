@@ -278,8 +278,9 @@ function block_exastats_get_categories($courseid = null) {
 	$categories = array();
 	// get categories from mdl_quiz
 	$params = [];
-	if ($courseid)
-		$params['course'] = intval($courseid);
+	if ($courseid) {
+        $params['course'] = intval($courseid);
+    }
 	$recs = $DB->get_records('quiz', $params, 'name');
 	foreach ($recs as $rec) {
 		if (!in_array($rec->name, $categories)) {
@@ -485,8 +486,9 @@ function block_exastats_get_questionnaireresults_by_category($courseid, $categor
 		require_once $CFG->dirroot.'/mod/questionnaire/questionnaire.class.php';
 		//require_once $CFG->dirroot.'/mod/questionnaire/classes/response/base.php';
 		//$respBase = new mod_questionnaire\response\base();
-		$sql = 'SELECT qr.* FROM {questionnaire} qr 					
-					WHERE qr.course = :courseid ';
+		$sql = 'SELECT qr.* 
+                  FROM {questionnaire} qr 					
+				  WHERE qr.course = :courseid ';
 		$params = array('courseid' => $courseid);
 		if ($qrrs = $DB->get_records_sql($sql, $params)) {
 		    $rankfieldname = 'rank';
@@ -499,7 +501,7 @@ function block_exastats_get_questionnaireresults_by_category($courseid, $categor
             }
 			// list of questionnairs for course
 			foreach ($qrrs as $questionnair) {
-				$sql = 'SELECT DISTINCT CONCAT_WS(\'_\', q.id, u.id, qr.id) as uiniq, q.id as qid, q.name as qname, q.content as qcontent,
+				$sql = 'SELECT DISTINCT CONCAT_WS(\'_\', q.id, u.id, qr.id, qrr.'.$rankfieldname.') as uiniq, q.id as qid, q.name as qname, q.content as qcontent,
  									qrr.'.$rankfieldname.' as qrrrank, u.id as uid,
  									qr.id as qrid, qr.submitted as submitted
 						 FROM {questionnaire_response} qr 
@@ -526,8 +528,9 @@ HAVING qrsubmitted = lasttimesubmitted*/
 				$alreadyasked = array();
 				foreach ($questions as $q) {
 					$uniqId = $q->qid.'_'.$q->uid; // question id + user id
-					if (in_array($uniqId, $alreadyasked))
-						continue;
+					if (in_array($uniqId, $alreadyasked)) {
+                        continue;
+                    }
 					$alreadyasked[] = $uniqId;
 					$question = [];
 					$question['content'] = strip_tags($q->qcontent);
@@ -603,7 +606,7 @@ function block_exastats_get_questionnaire_short_results($courseid, $users = null
 			if (isset($q_result['questions'])) {
 				$result[$categoryKey]['questions'] = $q_result['questions'];
 				foreach ($q_result['questions'] as $question) {
-					$result[$categoryKey]['ranks'][$question['response'] + 1] += 1;
+					@$result[$categoryKey]['ranks'][$question['response'] + 1] += 1;
 				}
 			}
 		//}
