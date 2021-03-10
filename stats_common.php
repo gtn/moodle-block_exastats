@@ -45,6 +45,13 @@ $PAGE->set_heading(get_string('pluginname', "block_exastats"));
 
 echo $OUTPUT->header();
 
+// in new version of questionnaire module they changed real value in radio input 0 -> 1, 1 -> 2,....
+// so we need to use this koeff
+$responseKoeff = 0;
+if ($CFG->version >= 2018050104) {
+    $responseKoeff = 1;
+}
+
 echo '<h2>'.get_string('my_stats', 'block_exastats').'</h2>';
 echo '<div class="bloks_exastats teacher_stats">';
 
@@ -111,10 +118,10 @@ foreach ($categories as $categoryKey => $category) {
 		foreach ($questionnair_results['questions'] as $question) {
 			echo '<tr>';
 			echo '<td>'.$question['content'].'</td>';
-			echo '<td align="center" valign="middle">'.($question['response'] == 0 ? 'X' : '').'</td>';
-			echo '<td align="center" valign="middle">'.($question['response'] == 1 ? 'X' : '').'</td>';
-			echo '<td align="center" valign="middle">'.($question['response'] == 2 ? 'X' : '').'</td>';
-			echo '<td align="center" valign="middle">'.($question['response'] == 3 ? 'X' : '').'</td>';
+			echo '<td align="center" valign="middle">'.($question['response'] == 0 + $responseKoeff ? 'X' : '').'</td>';
+			echo '<td align="center" valign="middle">'.($question['response'] == 1 + $responseKoeff ? 'X' : '').'</td>';
+			echo '<td align="center" valign="middle">'.($question['response'] == 2 + $responseKoeff ? 'X' : '').'</td>';
+			echo '<td align="center" valign="middle">'.($question['response'] == 3 + $responseKoeff ? 'X' : '').'</td>';
 			echo '</tr>';
 		}
 		echo '</table>';

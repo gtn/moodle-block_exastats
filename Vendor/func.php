@@ -125,10 +125,17 @@ function blockVendor_exastats_get_groupusers($schoolids = null, $onlyIds = false
 }
 
 function blockVendor_exastats_get_questionnaire_short_results($courseid, $users = null) {
+    global $CFG;
 	$categories = blockVendor_exastats_get_categories($courseid);
 	if (!$users)
 		$users = array();
 	$result = array();
+    // in new version of questionnaire module they changed real value in radio input 0 -> 1, 1 -> 2,....
+    // so we need to use this koeff
+    $responseKoeff = 1;
+    if ($CFG->version >= 2018050104) {
+        $responseKoeff = 0;
+    }
 	foreach ($categories as $categoryKey => $categoryName) {
 		$result[$categoryKey] = array();
 		$result[$categoryKey]['questions'] = array();
@@ -139,7 +146,7 @@ function blockVendor_exastats_get_questionnaire_short_results($courseid, $users 
 		if (isset($q_result['questions'])) {
 			$result[$categoryKey]['questions'] = $q_result['questions'];
 			foreach ($q_result['questions'] as $question) {
-				$result[$categoryKey]['ranks'][$question['response'] + 1] += 1;
+				$result[$categoryKey]['ranks'][$question['response'] + $responseKoeff] += 1;
 			}
 		}
 		//}

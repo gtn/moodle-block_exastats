@@ -586,6 +586,7 @@ function block_exastats_get_questionnaireresults_by_category2($courseid, $catego
 }
 
 function block_exastats_get_questionnaire_short_results($courseid, $users = null) {
+    global $CFG;
 	$categories = block_exastats_get_categories($courseid);
 	if (!$users) {
 		$schoolid = block_exastats_get_schoolid_byusername();
@@ -606,7 +607,7 @@ function block_exastats_get_questionnaire_short_results($courseid, $users = null
 			if (isset($q_result['questions'])) {
 				$result[$categoryKey]['questions'] = $q_result['questions'];
 				foreach ($q_result['questions'] as $question) {
-					@$result[$categoryKey]['ranks'][$question['response'] + 1] += 1;
+					@$result[$categoryKey]['ranks'][$question['response'] + $responseKoeff] += 1;
 				}
 			}
 		//}
@@ -626,10 +627,17 @@ function block_exastats_get_questionnaire_short_results($courseid, $users = null
 }
 
 function block_exastats_get_questionnaire_short_results2($courseid) {
+    global $CFG;
 	$categories = block_exastats_get_categories($courseid);
 	$schoolid = block_exastats_get_schoolid_byusername();
 	$users = block_exastats_get_groupusers($schoolid, true);
 	$result = array();
+    // in new version of questionnaire module they changed real value in radio input 0 -> 1, 1 -> 2,....
+    // so we need to use this koeff
+    $responseKoeff = 1;
+    if ($CFG->version >= 2018050104) {
+        $responseKoeff = 0;
+    }
 	foreach ($categories as $categoryKey => $categoryName) {
 		$result[$categoryKey] = array();
 		$result[$categoryKey]['category_name'] = $categoryName;
@@ -637,7 +645,7 @@ function block_exastats_get_questionnaire_short_results2($courseid) {
 		foreach ($users as $userid) {
 			$q_result = block_exastats_get_questionnaireresults_by_category($courseid, $categoryKey, $userid);
 			foreach ($q_result['questions'] as $question) {
-				$result[$categoryKey]['ranks'][$question['response']+1] += 1;
+				$result[$categoryKey]['ranks'][$question['response'] + $responseKoeff] += 1;
 			}
 		}
 		$total_sum_ranks = 0;

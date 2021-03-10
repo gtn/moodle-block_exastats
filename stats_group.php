@@ -46,6 +46,19 @@ $PAGE->set_heading(get_string('pluginname', "block_exastats"));
 
 echo $OUTPUT->header();
 
+// in new version of questionnaire module they changed real value in radio input 0 -> 1, 1 -> 2,....
+// so we need to use this koeff
+$responsesEmptyArray = array_fill_keys(array(0, 1, 2, 3), '');
+$minRespVal = 0;
+$maxRespVal = 3;
+$responseKoeff = 0;
+if ($CFG->version >= 2018050104) {
+    $responsesEmptyArray = array_fill_keys(array(1, 2, 3, 4), '');
+    $minRespVal = 1;
+    $maxRespVal = 4;
+    $responseKoeff = 1;
+}
+
 if (!isset($filter['schoolnumber'])) {
     $schoolid = block_exastats_get_schoolid_byusername();
 } else {
@@ -95,7 +108,7 @@ if (count($users) >= $minUsersForReport) {
         // QUESTIONNAIRE
         $questionnair_results[$categoryKey] = array();
         $questionnair_results[$categoryKey]['questions'] = array();
-        $all_category_responses[$categoryKey] = array_fill_keys(array(0, 1, 2, 3), '');
+        $all_category_responses[$categoryKey] = $responsesEmptyArray;
         $questionnair_result = block_exastats_get_questionnaireresults_by_category($courseid, $category, $users);
         foreach ($questionnair_result['questions'] as $question) {
             $questionId = $question['id'];
@@ -114,15 +127,15 @@ if (count($users) >= $minUsersForReport) {
                 $questionnair_results[$categoryKey]['questions'][$questionId]['id'] = $questionId;
                 $questionnair_results[$categoryKey]['questions'][$questionId]['content'] = $question['content'];
                 //$questionnair_results[$categoryKey]['questions'][$questionId]['response'] = array();
-                $questionnair_results[$categoryKey]['questions'][$questionId]['response'] = array_fill_keys(array(0, 1, 2, 3), '');
-                $questionnair_results[$categoryKey]['questions'][$questionId]['responsepercent'] = array_fill_keys(array(0, 1, 2, 3), '');
+                $questionnair_results[$categoryKey]['questions'][$questionId]['response'] = $responsesEmptyArray;
+                $questionnair_results[$categoryKey]['questions'][$questionId]['responsepercent'] = $responsesEmptyArray;
             }
             // count of question responses
             $questionnair_results[$categoryKey]['questions'][$questionId]['response'][$currentQuestionResponse] += 1; // +1 for needed question response (or for 0:Trifft völlig zu., or for 1:Trifft eher zu. ....)
         }
         // fill percents
         foreach ($answeredusers as $questionId => $countResponses) {
-            for ($resp_i = 0; $resp_i <= 3; $resp_i++) {
+            for ($resp_i = $minRespVal; $resp_i <= $maxRespVal; $resp_i++) {
                 if ($countResponses > 0) {
                     $questionnair_results[$categoryKey]['questions'][$questionId]['responsepercent'][$resp_i] =
                             $questionnair_results[$categoryKey]['questions'][$questionId]['response'][$resp_i] / $countResponses * 100;
@@ -254,20 +267,20 @@ if (count($users) >= $minUsersForReport) {
                 echo '<tr>';
                 echo '<td>'.$question['content'].'</td>';
                 echo '<td align="center" valign="middle">'.
-                        $question['response'][0].
-                        ($question['response'][0] > 0 ? ' ('.number_format($question['responsepercent'][0], 2).'%)' : '').
+                        $question['response'][0 + $responseKoeff].
+                        ($question['response'][0 + $responseKoeff] > 0 ? ' ('.number_format($question['responsepercent'][0 + $responseKoeff], 2).'%)' : '').
                         '</td>';
                 echo '<td align="center" valign="middle">'.
-                        $question['response'][1].
-                        ($question['response'][1] > 0 ? ' ('.number_format($question['responsepercent'][1], 2).'%)' : '').
+                        $question['response'][1 + $responseKoeff].
+                        ($question['response'][1 + $responseKoeff] > 0 ? ' ('.number_format($question['responsepercent'][1 + $responseKoeff], 2).'%)' : '').
                         '</td>';
                 echo '<td align="center" valign="middle">'.
-                        $question['response'][2].
-                        ($question['response'][2] > 0 ? ' ('.number_format($question['responsepercent'][2], 2).'%)' : '').
+                        $question['response'][2 + $responseKoeff].
+                        ($question['response'][2 + $responseKoeff] > 0 ? ' ('.number_format($question['responsepercent'][2 + $responseKoeff], 2).'%)' : '').
                         '</td>';
                 echo '<td align="center" valign="middle">'.
-                        $question['response'][3].
-                        ($question['response'][3] > 0 ? ' ('.number_format($question['responsepercent'][3], 2).'%)' : '').
+                        $question['response'][3 + $responseKoeff].
+                        ($question['response'][3 + $responseKoeff] > 0 ? ' ('.number_format($question['responsepercent'][3 + $responseKoeff], 2).'%)' : '').
                         '</td>';
                 echo '</tr>';
             }
