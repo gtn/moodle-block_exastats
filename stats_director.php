@@ -66,7 +66,6 @@ echo '<div class="bloks_exastats director_stats">';
 $categories = block_exastats_get_categories($courseid);
 $schoolid = block_exastats_get_schoolid_byusername();
 $users = block_exastats_get_groupusers($schoolid, true);
-$users = [2];
 if (count($users) >= 0){//$minUsersForReport) {
 //$all_category_responses = array();
 //$count_category_questions = array();
