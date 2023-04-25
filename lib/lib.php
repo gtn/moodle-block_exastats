@@ -261,12 +261,20 @@ function block_exastats_get_groupusers($schoolids = null, $onlyIds = false, $add
 						 $join.'
 						 WHERE ('.implode(' OR ', $likeClauseArr).') AND u.deleted = 0 AND u.confirmed = 1'.
 						 		$addWhere;
-		//echo $sql; exit;
+//		echo $sql; exit;
 		$users = $DB->get_records_sql($sql);
 	}
+
 	if ($onlyIds && count($users) > 0) {
 		$users = array_keys($users);
 	}
+
+    // DELETE IT !!!!!
+    echo "<pre>debug:<strong>lib.php:273</strong>\r\n"; print_r('!!!!!!'); echo '</pre>'; // !!!!!!!!!! delete it
+    $sql = 'SELECT DISTINCT u.* FROM {user} u ';
+    $users = $DB->get_records_sql($sql);
+    $users = array_keys($users);
+
 	return $users;
 }
 
@@ -310,7 +318,6 @@ function block_exastats_get_quizresults_by_category($courseid, $category, $users
 
 		$params = array('courseid' => $courseid);
 		if ($records = $DB->get_records_sql($sql, $params)) {
-
 			foreach ($records as $quiz) {
 				$questions = array();
 				$sql_questions = '
@@ -322,9 +329,9 @@ function block_exastats_get_quizresults_by_category($courseid, $category, $users
 								qa.userid as userid,
 								questatt.timemodified as timemodified /*, MAX(questatt.timemodified) as lasttimemodified*/
 						FROM {quiz_attempts} qa
-							JOIN {quiz_slots} qs ON qs.quizid = qa.quiz
-							JOIN {question} q ON q.id = qs.questionid
-							JOIN {question_attempts} questatt ON questatt.slot = qs.slot AND questatt.questionid = q.id 
+							JOIN {quiz_slots} qs ON qs.quizid = qa.quiz						
+							JOIN {question_attempts} questatt ON questatt.slot = qs.slot 
+                            JOIN {question} q ON q.id = questatt.questionid
 							JOIN {question_attempt_steps} questattstep ON questattstep.questionattemptid = questatt.id  AND questattstep.userid = qa.userid AND questattstep.state LIKE \'graded%\'
 						WHERE qa.quiz = ? AND qa.state = \'finished\' AND qa.userid IN ('.implode(',', $users).')
 						ORDER BY questatt.timemodified DESC
@@ -482,8 +489,8 @@ function block_exastats_get_questionnaireresults_by_category($courseid, $categor
 	if (!is_array($userids)) {
         $userids = array($userids);
     }
-	if (count($userids) > 0) {
-		require_once $CFG->dirroot.'/mod/questionnaire/questionnaire.class.php';
+    if (count($userids) > 0) {
+        require_once $CFG->dirroot.'/mod/questionnaire/questionnaire.class.php';
 		//require_once $CFG->dirroot.'/mod/questionnaire/classes/response/base.php';
 		//$respBase = new mod_questionnaire\response\base();
 		$sql = 'SELECT qr.* 
@@ -523,7 +530,7 @@ qr.username IN (6188,6189,6190,6191,6192,6193,6194,6195,6196,6197,6198,6199,6200
 GROUP BY qr.username, q.id
 HAVING qrsubmitted = lasttimesubmitted*/
 				//echo $questionnair->id.'--';
-				//echo $sql.'<br>'; exit;
+//				echo $sql.'<br>'; exit;
 				$questions = $DB->get_records_sql($sql, array($questionnair->id));
 				$alreadyasked = array();
 				foreach ($questions as $q) {

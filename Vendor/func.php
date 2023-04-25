@@ -321,9 +321,9 @@ function blockVendor_exastats_get_quizresults_by_category($courseid, $category, 
 								qa.userid as userid,
 								questatt.timemodified as timemodified /*, MAX(questatt.timemodified) as lasttimemodified*/
 						FROM mdl_quiz_attempts qa
-							JOIN mdl_quiz_slots qs ON qs.quizid = qa.quiz
-							JOIN mdl_question q ON q.id = qs.questionid
-							JOIN mdl_question_attempts questatt ON questatt.slot = qs.slot AND questatt.questionid = q.id 
+							JOIN mdl_quiz_slots qs ON qs.quizid = qa.quiz							
+							JOIN mdl_question_attempts questatt ON questatt.slot = qs.slot 
+						    JOIN mdl_question q ON q.id = questatt.questionid
 							JOIN mdl_question_attempt_steps questattstep ON questattstep.questionattemptid = questatt.id  AND questattstep.userid = qa.userid AND questattstep.state LIKE \'graded%\'
 						WHERE qa.quiz = '.intval($quiz['id']).' AND qa.state = \'finished\' AND qa.userid IN ('.implode(',', $users).')
 						ORDER BY questatt.timemodified DESC
