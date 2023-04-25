@@ -269,12 +269,6 @@ function block_exastats_get_groupusers($schoolids = null, $onlyIds = false, $add
 		$users = array_keys($users);
 	}
 
-    // DELETE IT !!!!!
-    echo "<pre>debug:<strong>lib.php:273</strong>\r\n"; print_r('!!!!!!'); echo '</pre>'; // !!!!!!!!!! delete it
-    $sql = 'SELECT DISTINCT u.* FROM {user} u ';
-    $users = $DB->get_records_sql($sql);
-    $users = array_keys($users);
-
 	return $users;
 }
 
