@@ -112,8 +112,8 @@ function block_exastats_get_schools_byfilter($filter) {
 		$arguments = array_merge($arguments, $arg);
 	}
 	// get zips by region
-	$sql = 'SELECT DISTINCT * 
-				FROM '.$tableCities.' c 
+	$sql = 'SELECT DISTINCT *
+				FROM '.$tableCities.' c
 				 WHERE 1=1 '.$addWhere;
 	$zips = array_keys($DB->get_records_sql($sql, $arguments));
 	$zips = array_filter(array_map('intval', $zips));*/
@@ -172,8 +172,8 @@ function block_exastats_get_schools_byfilter($filter) {
 
 
 	// get schoolids by zips and additional where
-	$sql = 'SELECT DISTINCT * 
-			FROM '.$tableSchools.' s 
+	$sql = 'SELECT DISTINCT *
+			FROM '.$tableSchools.' s
 			 WHERE 1=1 '.$addWhere;
 	//echo $sql; exit;
 	$schoolids = array_keys($DB->get_records_sql($sql, $arguments));
@@ -315,7 +315,7 @@ function block_exastats_get_quizresults_by_category($courseid, $category, $users
 			foreach ($records as $quiz) {
 				$questions = array();
 				$sql_questions = '
-				SELECT DISTINCT CONCAT(q.id, \'_\', qa.userid, \'_\', qs.slot, \'_\', questatt.timemodified) as uniqueid, q.id as questionid, q.name as questionname, q.questiontext as questiontext, 
+				SELECT DISTINCT CONCAT(q.id, \'_\', qa.userid, \'_\', qs.slot, \'_\', questatt.timemodified) as uniqueid, q.id as questionid, q.name as questionname, q.questiontext as questiontext,
 								questatt.questionsummary  as questionsummary, questatt.responsesummary as responsesummary, questatt.rightanswer as response_correct,
 								questatt.questionsummary as questionsummary, questatt.flagged as flagged,
 								questattstep.state as state,
@@ -323,8 +323,8 @@ function block_exastats_get_quizresults_by_category($courseid, $category, $users
 								qa.userid as userid,
 								questatt.timemodified as timemodified /*, MAX(questatt.timemodified) as lasttimemodified*/
 						FROM {quiz_attempts} qa
-							JOIN {quiz_slots} qs ON qs.quizid = qa.quiz						
-							JOIN {question_attempts} questatt ON questatt.slot = qs.slot 
+							JOIN {quiz_slots} qs ON qs.quizid = qa.quiz
+							JOIN {question_attempts} questatt ON questatt.slot = qs.slot
                             JOIN {question} q ON q.id = questatt.questionid
 							JOIN {question_attempt_steps} questattstep ON questattstep.questionattemptid = questatt.id  AND questattstep.userid = qa.userid AND questattstep.state LIKE \'graded%\'
 						WHERE qa.quiz = ? AND qa.state = \'finished\' AND qa.userid IN ('.implode(',', $users).')
@@ -451,9 +451,9 @@ function block_exastats_get_quizresults_by_category2($courseid, $category, $user
 			// get slots => get quiestions
 			//$quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quiz);
 			//$slots = $quba->get_slots();
-			$sql_questions = 'SELECT q.* 
+			$sql_questions = 'SELECT q.*
 								FROM {quiz_slots} s
-									LEFT JOIN {question} q ON q.id = s.questionid 
+									LEFT JOIN {question} q ON q.id = s.questionid
 								WHERE quizid = :quizid';
 			$params = array('quizid' => $quiz->id);
 			$questions = $DB->get_records_sql($sql_questions, $params);
@@ -487,8 +487,8 @@ function block_exastats_get_questionnaireresults_by_category($courseid, $categor
         require_once $CFG->dirroot.'/mod/questionnaire/questionnaire.class.php';
 		//require_once $CFG->dirroot.'/mod/questionnaire/classes/response/base.php';
 		//$respBase = new mod_questionnaire\response\base();
-		$sql = 'SELECT qr.* 
-                  FROM {questionnaire} qr 					
+		$sql = 'SELECT qr.*
+                  FROM {questionnaire} qr
 				  WHERE qr.course = :courseid ';
 		$params = array('courseid' => $courseid);
 		if ($qrrs = $DB->get_records_sql($sql, $params)) {
@@ -505,11 +505,11 @@ function block_exastats_get_questionnaireresults_by_category($courseid, $categor
 				$sql = 'SELECT DISTINCT CONCAT_WS(\'_\', q.id, u.id, qr.id, qrr.'.$rankfieldname.') as uiniq, q.id as qid, q.name as qname, q.content as qcontent,
  									qrr.'.$rankfieldname.' as qrrrank, u.id as uid,
  									qr.id as qrid, qr.submitted as submitted
-						 FROM {questionnaire_response} qr 
-								JOIN {questionnaire_response_rank} qrr ON qrr.response_id = qr.id AND qr.'.$surveyfieldname.' = ? AND qr.complete = \'y\' 
-								LEFT JOIN {user} u ON u.id = CAST(qr.'.$userfieldname.' AS SIGNED) 
+						 FROM {questionnaire_response} qr
+								JOIN {questionnaire_response_rank} qrr ON qrr.response_id = qr.id AND qr.'.$surveyfieldname.' = ? AND qr.complete = \'y\'
+								LEFT JOIN {user} u ON u.id = CAST(qr.'.$userfieldname.' AS SIGNED)
 								JOIN {questionnaire_question} q ON q.id = qrr.question_id
-						WHERE qr.'.$userfieldname.' IN ('.implode(',', $userids).') AND q.name LIKE \''.substr($category, 0, 1).'%\' 
+						WHERE qr.'.$userfieldname.' IN ('.implode(',', $userids).') AND q.name LIKE \''.substr($category, 0, 1).'%\'
 						ORDER BY q.id, u.id, qr.submitted DESC';
 				// may be with HEAVING?
 /*				SELECT DISTINCT CONCAT_WS('_', q.id, u.id, qr.id) as uiniq, q.id as qid, q.name as qname, q.content as qcontent, qrr.rank as qrrrank, u.id as uid, qr.id as qrid, qr.submitted as qrsubmitted, MAX(qr.submitted) as lasttimesubmitted
@@ -588,6 +588,8 @@ function block_exastats_get_questionnaireresults_by_category2($courseid, $catego
 
 function block_exastats_get_questionnaire_short_results($courseid, $users = null) {
     global $CFG;
+    $responseKoeff = 0;
+
 	$categories = block_exastats_get_categories($courseid);
 	if (!$users) {
 		$schoolid = block_exastats_get_schoolid_byusername();
@@ -608,7 +610,7 @@ function block_exastats_get_questionnaire_short_results($courseid, $users = null
 			if (isset($q_result['questions'])) {
 				$result[$categoryKey]['questions'] = $q_result['questions'];
 				foreach ($q_result['questions'] as $question) {
-					@$result[$categoryKey]['ranks'][$question['response'] + $responseKoeff] += 1;
+                    $result[$categoryKey]['ranks'][$question['response'] + $responseKoeff] = ($result[$categoryKey]['ranks'][$question['response'] + $responseKoeff] ?: 0) + 1;
 				}
 			}
 		//}
@@ -646,7 +648,7 @@ function block_exastats_get_questionnaire_short_results2($courseid) {
 		foreach ($users as $userid) {
 			$q_result = block_exastats_get_questionnaireresults_by_category($courseid, $categoryKey, $userid);
 			foreach ($q_result['questions'] as $question) {
-				$result[$categoryKey]['ranks'][$question['response'] + $responseKoeff] += 1;
+                $result[$categoryKey]['ranks'][$question['response'] + $responseKoeff] = ($result[$categoryKey]['ranks'][$question['response'] + $responseKoeff] ?: 0) + 1;
 			}
 		}
 		$total_sum_ranks = 0;
@@ -678,10 +680,10 @@ function block_exastats_getansweredQuestionnaire_schools($courseid, $userids) {
             $surveyfieldname = 'questionnaireid';
         }
 		$sql = 'SELECT DISTINCT u.username
- 					FROM {questionnaire} q 
-						JOIN {questionnaire_response} qr ON qr.'.$surveyfieldname.' = q.id						   
-						LEFT JOIN {user} u ON u.id = CAST(qr.'.$userfieldname.' AS SIGNED) 								
-						WHERE q.course = ? AND qr.complete = \'y\' AND qr.'.$userfieldname.' IN ('.implode(',', $userids).')  
+ 					FROM {questionnaire} q
+						JOIN {questionnaire_response} qr ON qr.'.$surveyfieldname.' = q.id
+						LEFT JOIN {user} u ON u.id = CAST(qr.'.$userfieldname.' AS SIGNED)
+						WHERE q.course = ? AND qr.complete = \'y\' AND qr.'.$userfieldname.' IN ('.implode(',', $userids).')
 						ORDER BY u.username';
 		$users = $DB->get_records_sql($sql, array($courseid));
 		foreach ($users as $username) {
@@ -698,11 +700,11 @@ function block_exastats_getansweredQuiz_schools($courseid, $userids) {
 	$result = array();
 	if (count($userids) > 0) {
 		$sql = 'SELECT DISTINCT u.username
- 					FROM {quiz} q 
+ 					FROM {quiz} q
  						JOIN {quiz_attempts} qa ON qa.quiz = q.id
-						LEFT JOIN {user} u ON u.id = CAST(qa.userid AS SIGNED) 								
-						WHERE q.course = ? AND qa.state = \'finished\' AND qa.userid IN ('.implode(',', $userids).') 
-						ORDER BY u.username												
+						LEFT JOIN {user} u ON u.id = CAST(qa.userid AS SIGNED)
+						WHERE q.course = ? AND qa.state = \'finished\' AND qa.userid IN ('.implode(',', $userids).')
+						ORDER BY u.username
 						';
 		$users = $DB->get_records_sql($sql, array($courseid));
 		foreach ($users as $username) {
@@ -861,14 +863,14 @@ function block_exastats_stopOutputWithMessage(&$OUTPUT, $message = '', $courseid
 function block_exastats_is_user_has_role_in_course($user_id, $course_id, $role = 'student') {
     global $DB;
 
-    $sql = 'SELECT * 
-              FROM {role_assignments} AS ra 
-                LEFT JOIN {user_enrolments} AS ue ON ra.userid = ue.userid 
-                LEFT JOIN {role} AS r ON ra.roleid = r.id 
-                LEFT JOIN {context} AS c ON c.id = ra.contextid 
-                LEFT JOIN {enrol} AS e ON e.courseid = c.instanceid AND ue.enrolid = e.id 
-              WHERE r.shortname = ? 
-                AND ue.userid = ? 
+    $sql = 'SELECT *
+              FROM {role_assignments} AS ra
+                LEFT JOIN {user_enrolments} AS ue ON ra.userid = ue.userid
+                LEFT JOIN {role} AS r ON ra.roleid = r.id
+                LEFT JOIN {context} AS c ON c.id = ra.contextid
+                LEFT JOIN {enrol} AS e ON e.courseid = c.instanceid AND ue.enrolid = e.id
+              WHERE r.shortname = ?
+                AND ue.userid = ?
                 AND e.courseid = ? ';
     $result = $DB->get_records_sql($sql, array($role, $user_id, $course_id));
     if ($result) {
